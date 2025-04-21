@@ -8,15 +8,21 @@ function App() {
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [error, setError] = useState(null);
   const inputRef = useRef(null);
 
   useEffect(() => {
     async function fetchUsers() {
-      setIsLoading(true);
-      const response = await fetch(URL);
-      const data = await response.json();
-      setUsers(data);
-      setIsLoading(false);
+      try {
+        setIsLoading(true);
+        const response = await fetch(URL);
+        const data = await response.json();
+        setUsers(data);
+        setIsLoading(false);
+      } catch (error) {
+        setError("Failed to fetch users ⚠️");
+        console.log(error.message);
+      }
     }
 
     fetchUsers();
@@ -32,25 +38,31 @@ function App() {
   return (
     <div className="app">
       <h1>User Directory</h1>
-      <input
-        type="text"
-        ref={inputRef}
-        placeholder="Search users by name..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className="search-input"
-      />
-
-      {isLoading ? (
-        <p style={{ textAlign: "center" }}>Loading...</p>
+      {error ? (
+        <p className="error">{error}</p>
       ) : (
-        <ul className="user-list">
-          {filteredUsers.map((user) => (
-            <li key={user.id}>
-              <UserCard user={user} />
-            </li>
-          ))}
-        </ul>
+        <>
+          <input
+            type="text"
+            ref={inputRef}
+            placeholder="Search users by name..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
+          />
+
+          {isLoading ? (
+            <p style={{ textAlign: "center" }}>Loading...</p>
+          ) : (
+            <ul className="user-list">
+              {filteredUsers.map((user) => (
+                <li key={user.id}>
+                  <UserCard user={user} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
       )}
     </div>
   );
